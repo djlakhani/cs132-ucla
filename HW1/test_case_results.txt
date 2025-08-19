@@ -1,0 +1,25 @@
+Input: (1 2)
+Successfully parsed!
+Parsed Str: 1 2 _
+ 
+Input: $  1 + 
+ (1 -++$2) $ #The Life of a Showgirl 
+ 3
+Successfully parsed!
+Parsed Str: 1 $ 1 2 $ ++_ - + 3 $ _
+ 
+Input: $ $ 1 ++ ++ - $2
+Successfully parsed!
+Parsed Str: 1 $ $ _++ _++ 2 $ -
+ 
+Input: 1 ++ ++ - $2
+Successfully parsed!
+Parsed Str: 1 _++ _++ 2 $ - 
+
+Input: $ ++ 1 - 2
+Successfully parsed!
+Parsed Str: 1 ++_ $ 2 - 
+
+Input: ++1++
+Successfully parsed!
+Parsed Str: 1 ++_ _++
