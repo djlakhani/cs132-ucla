@@ -17,6 +17,7 @@ public class SymbolTable {
     
     public void addClass(String className, ClassInfo classInfo) {
         if (classes.containsKey(className)) {
+            System.out.println("Class " + className + " already defined!");
             throw new RuntimeException("Class " + className + " already defined!");
         }
         classes.put(className, classInfo);
@@ -30,5 +31,4 @@ public class SymbolTable {
         return classes.containsKey(className);
     }
      
-    // TODO: Maybe handle cases involving class extension??
 }

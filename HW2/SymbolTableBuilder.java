@@ -1,11 +1,8 @@
 import java.util.*;
 
-//import org.w3c.dom.Node;
-
 import syntaxtree.*;
 import visitor.*;
 
-// import org.w3c.dom.Node;
 
 public class SymbolTableBuilder extends GJDepthFirst<Void, Void> {
     private SymbolTable symTable;
@@ -15,6 +12,9 @@ public class SymbolTableBuilder extends GJDepthFirst<Void, Void> {
         this.symTable = new SymbolTable();
     }
 
+    /*
+     * Goal / Root node Visitor
+     */
     @Override
     public Void visit(Goal n, Void arg) {
         n.f0.accept(this, null);
@@ -32,6 +32,9 @@ public class SymbolTableBuilder extends GJDepthFirst<Void, Void> {
         return symTable;
     }
 
+    /*
+     * Main Class Visitor
+     */
     @Override
     public Void visit(MainClass n, Void arg) {
         String mainClassName = n.f1.f0.tokenImage;
@@ -39,12 +42,28 @@ public class SymbolTableBuilder extends GJDepthFirst<Void, Void> {
         String mainArgName = n.f11.f0.tokenImage;
         MethodInfo mainMethod = new MethodInfo("main", "void");
         mainMethod.addParameter(mainArgName, "String[]");
+
+        String localName;
+        String localType;
+
+        if (n.f14.present()) {
+            for (Node vd : n.f14.nodes) {
+                VarDeclaration varDec = (VarDeclaration) vd;
+                localName = varDec.f1.f0.tokenImage;
+                localType = extractType(varDec.f0);
+                mainMethod.addLocalVar(localName, localType);
+            }
+        }
+
         mainClass.addMethod("main", mainMethod);
         this.symTable.addClass(mainClassName, mainClass);
         return null;
     }
 
 
+    /*
+     * TypeDeclaration Visitor.
+     */
     @Override
     public Void visit(TypeDeclaration n, Void arg) {
         n.f0.choice.accept(this, null);
@@ -116,6 +135,9 @@ public class SymbolTableBuilder extends GJDepthFirst<Void, Void> {
     }
 
 
+    /*
+     * MethodDeclaration visitor.
+     */
     @Override
     public Void visit(MethodDeclaration n, Void arg) {
         String methodName = n.f2.f0.tokenImage;
@@ -171,13 +193,17 @@ public class SymbolTableBuilder extends GJDepthFirst<Void, Void> {
 
         if (choice instanceof BooleanType) {
             return "boolean";
-        } else if (choice instanceof IntegerType) {
+        } 
+        else if (choice instanceof IntegerType) {
             return "int";
-        } else if (choice instanceof ArrayType) {
+        } 
+        else if (choice instanceof ArrayType) {
             return "int[]";
-        } else if (choice instanceof Identifier) {
+        } 
+        else if (choice instanceof Identifier) {
             return ((Identifier) choice).f0.tokenImage;
-        } else {
+        } 
+        else {
             throw new RuntimeException("Unrecognized type node!");
         }
     }

@@ -14,6 +14,7 @@ public class TypecheckVisitor extends GJDepthFirst<String, MethodClass> {
         this.symTable = symTable;
     }
 
+    // Goal
     public String visit(Goal n, MethodClass mc) {
         n.f0.accept(this, null);
         if (n.f1.present()) {
@@ -25,6 +26,7 @@ public class TypecheckVisitor extends GJDepthFirst<String, MethodClass> {
         return null;
     }
 
+    // MainClass
     public String visit(MainClass n, MethodClass mc) {
         String mainClassName = n.f1.f0.tokenImage;
         ClassInfo mainClass = this.symTable.getClass(mainClassName);
@@ -41,7 +43,67 @@ public class TypecheckVisitor extends GJDepthFirst<String, MethodClass> {
         return null;
     }
 
+    // TypeDeclaration
+    public String visit(TypeDeclaration n, MethodClass mc) {
+        n.f0.choice.accept(this, null);
+        return null;
+    }
 
+    // ClassDeclaration
+    public String visit(ClassDeclaration n, MethodClass mc) {
+        String className = n.f1.f0.tokenImage;
+        ClassInfo c = symTable.getClass(className);
+        MethodClass newmc = new MethodClass(c, null);
+        if (n.f4.present()) {
+            for (Node m : n.f4.nodes) {
+                MethodDeclaration md = (MethodDeclaration) m;
+                md.accept(this, newmc);
+            }
+        }
+        return null;
+    }
+
+
+    // ClassExtendsDeclaration
+    public String visit(ClassExtendsDeclaration n, MethodClass mc) {
+        String className = n.f1.f0.tokenImage;
+        ClassInfo c = symTable.getClass(className);
+        MethodClass newmc = new MethodClass(c, null);
+        if (n.f6.present()) {
+            for (Node m : n.f6.nodes) {
+                MethodDeclaration md = (MethodDeclaration) m;
+                md.accept(this, newmc);
+            }
+        }
+        return null;
+    }
+
+
+    // MethodDeclaration
+    public String visit(MethodDeclaration n, MethodClass mc) {
+        String methodName = n.f2.f0.tokenImage;
+        ClassInfo c = mc.getClassInfo();
+        MethodInfo m = c.getMethod(methodName);
+        MethodClass newmc = new MethodClass(c, m);
+        if (n.f8.present()) {
+            for (Node s : n.f8.nodes) {
+                Statement sta = (Statement) s;
+                sta.accept(this, newmc);
+            }
+        }
+
+        String methodRetType = m.getReturnType();
+        String methodRet = n.f10.accept(this, newmc);
+        
+        if (!methodRetType.equals(methodRet)) {
+            System.out.println("Method return type does not match!");
+            throw new RuntimeException("Method return type does not match!");
+        }
+        return null;
+    }
+
+
+    // Statement
     public String visit(Statement n, MethodClass mc) {
         Node choice = n.f0.choice;
         if (choice instanceof Block) {
@@ -77,7 +139,7 @@ public class TypecheckVisitor extends GJDepthFirst<String, MethodClass> {
         return null;
     }
 
-    
+    // Block
     public String visit(Block n, MethodClass mc) {
         if (n.f1.present()) {
             for (Node node : n.f1.nodes) {
@@ -112,8 +174,9 @@ public class TypecheckVisitor extends GJDepthFirst<String, MethodClass> {
         String RHSType = n.f5.accept(this, mc);
         String parType = n.f2.accept(this, mc);
         if (varType == null || RHSType == null || parType == null || 
-        !varType.equals(INTARR) || !RHSType.equals(INTARR) || !parType.equals(INT)) {
-            System.out.println("Invalid array assignment statement!");
+        !varType.equals(INTARR) || !RHSType.equals(INT) || !parType.equals(INT)) {
+            System.out.println("Invalid array assignment statement! varType = " + varType + " RHSType = " + RHSType + " parType = " + parType);
+            System.out.println("varName = " + varName);
             throw new RuntimeException("Invalid array assignment statement!");
         }
         return null;
@@ -151,6 +214,8 @@ public class TypecheckVisitor extends GJDepthFirst<String, MethodClass> {
      * Checks method parameters, local variables, class fields, and parent class fields.
      */
     private String findVarType(String varName, MethodClass mc) {
+
+
         MethodInfo currMethod = mc.getMethodInfo();
 
         if (currMethod.hasLocal(varName)) {
@@ -176,6 +241,7 @@ public class TypecheckVisitor extends GJDepthFirst<String, MethodClass> {
 
 
 
+    // Expression
     public String visit(Expression n, MethodClass mc) {
 
         Node choice = n.f0.choice;
@@ -295,12 +361,6 @@ public class TypecheckVisitor extends GJDepthFirst<String, MethodClass> {
             return INT;
         }
 
-        // primary expression 
-        if (choice instanceof PrimaryExpression) {
-            PrimaryExpression e = (PrimaryExpression) choice;
-            return e.accept(this, null);
-        }
-
 
         // message send
         // objectReference.methodName(argumentList)
@@ -371,10 +431,19 @@ public class TypecheckVisitor extends GJDepthFirst<String, MethodClass> {
         }
 
 
+        // primary expression 
+        if (choice instanceof PrimaryExpression) {
+
+            PrimaryExpression e = (PrimaryExpression) choice;
+            return e.accept(this, mc);
+        }
+
+
         return null;
     }
 
 
+    // PrimaryExpression
     public String visit(PrimaryExpression n, MethodClass mc) {
         Node choice = n.f0.choice;
         if (choice instanceof IntegerLiteral) {
@@ -393,11 +462,13 @@ public class TypecheckVisitor extends GJDepthFirst<String, MethodClass> {
         }
         if (choice instanceof ArrayAllocationExpression) {
             ArrayAllocationExpression aae = (ArrayAllocationExpression) choice;
-            String num = aae.f2.accept(this, mc);
+            String num = aae.f3.accept(this, mc);
+
             if (!num.equals(INT)) {
                 System.out.println("Array length must be integer for array allocation!");
                 throw new RuntimeException("Array length must be integer for array allocation!");
             }
+
             return INTARR;
         }
         if (choice instanceof AllocationExpression) {
@@ -416,12 +487,19 @@ public class TypecheckVisitor extends GJDepthFirst<String, MethodClass> {
                 System.out.println("Incorrect type with Not!");
                 throw new RuntimeException("Incorrect type with Not!");
             }
+            return BOOLEAN;
         }
+
         if (choice instanceof BracketExpression) {
             BracketExpression be = (BracketExpression) choice;
             return be.f1.accept(this, mc);
         }
         
+
+
+        System.out.println("Hit the null in primary expression!");
+        Class clazz = choice.getClass();
+        System.out.println(clazz);
 
         return null;
 
