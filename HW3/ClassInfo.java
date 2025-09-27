@@ -17,6 +17,7 @@ public class ClassInfo {
     private final String parent;  // if this extends another class
     private final Map<String, String> fields = new LinkedHashMap<>();
     private final Map<String, MethodInfo> methods = new LinkedHashMap<>();
+    private int numFields = 0;
 
     public ClassInfo(String name, String parent) {
         this.name = name;
@@ -31,6 +32,10 @@ public class ClassInfo {
         return parent;
     }
 
+    public int getNumFields() {
+        return numFields;
+    }
+
     public Map<String, MethodInfo> getMethods() {
         return methods;
     }
@@ -41,6 +46,7 @@ public class ClassInfo {
             throw new RuntimeException("Field " + fieldName + " already defined in " + this.name + "!");
         }
         fields.put(fieldName, type);
+        numFields = numFields + 1;
     }
 
     public void addMethod(String methodName, MethodInfo method) {

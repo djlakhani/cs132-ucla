@@ -23,8 +23,8 @@ public class J2V {
             root.accept(stBuilder, null);
             SymbolTable symTable = stBuilder.getSymbolTable();
 
-            System.out.println("Printing Symbol Table...");
-            System.out.println(symTable);
+            System.err.println("Printing Symbol Table...");
+            System.err.println(symTable);
 
             // Building Virtual Method Tables
             VMTBuilder vmtBuilder = new VMTBuilder(symTable);
@@ -34,16 +34,17 @@ public class J2V {
             VMT vmt = vmtBuilder.getVMT();
             vmt.printVMT();
 
-            System.out.println("Successfully Converted!");
+
+            // Generating Vapor code
+            TranslatorVisitor tv = new TranslatorVisitor(symTable, vmt);
+            tv.visit(root, null);
+
+            System.err.println("Successfully Converted!");
 
 
-            //TODO: REMOVE testing / correction point
-            System.out.println("NEED TO CLEAN ABOVE");
-
-            
         }
         catch (Exception e) {
-            System.out.println(e);
+            System.err.println(e);
             return;
         }
         

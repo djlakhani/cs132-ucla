@@ -18,6 +18,7 @@ public class MethodInfo {
     private final Map<String, String> params = new LinkedHashMap<>();
     private final Map<String, String> locals = new LinkedHashMap<>();
     private final List<String> paramTypes = new ArrayList<>();
+    private final Map<Integer, String> regTypes = new LinkedHashMap<>();
 
     public MethodInfo(String methodName, String returnType) {
         this.name = methodName;
@@ -30,6 +31,10 @@ public class MethodInfo {
 
     public String getReturnType() {
         return returnType;
+    }
+
+    public Map<String, String> getAllParam() {
+        return params;
     }
 
     public void addParameter(String paramName, String type) {
@@ -67,6 +72,16 @@ public class MethodInfo {
 
     public List<String> getParamTypes() {
         return paramTypes;
+    }
+
+    // methods to handle registers declared in method
+
+    public void addType(int regIdx, String objType) {
+        regTypes.put(regIdx, objType);
+    }
+
+    public String regType(int regIdx) {
+        return regTypes.get(regIdx);
     }
 
 }

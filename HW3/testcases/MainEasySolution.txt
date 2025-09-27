@@ -1,0 +1,19 @@
+const vmt_A
+  :A.getValue
+
+
+func Main()
+  t.0 = HeapAllocZ(4)         # 1 slot (vmt) for A object
+  [t.0] = :vmt_A
+  a = t.0
+
+  t.1 = [a]                   # load vmt pointer
+  t.2 = [t.1+0]               # slot 0 = getValue
+  t.3 = call t.2(a 3)
+  PrintIntS(t.3)
+  ret
+
+
+func A.getValue(this x)
+  t.0 = AddS(x 1)
+  ret t.0

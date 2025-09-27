@@ -20,16 +20,18 @@ public class VMT {
         ClassToMethodTable.put(className, methodList);
     }
 
+    public VClass getVClass(String className) {
+        return ClassToMethodTable.get(className);
+    }
+
+    /**
+     * Pretty printing function for debugging purposes.
+     */
     public void printVMT() {
-
-        // TODO: REMOVE
-        System.out.println("GO TO FILE!!");
-        System.err.println("GO TO TERMINAL!!");
-
         for (Map.Entry<String, VClass> classMethod : ClassToMethodTable.entrySet()) {
             String className = classMethod.getKey();
             VClass vc = classMethod.getValue();
-            System.out.println("Class: " + className);
+            System.err.println("Class: " + className);
             vc.printVC();
         }
     }

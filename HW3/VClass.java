@@ -24,6 +24,7 @@ public class VClass {
         this.currIdx = 0;
     }
 
+
     /**
      * Add a method to the VClass and also specify the class where the method is defined.
      * @param methodName
@@ -31,8 +32,8 @@ public class VClass {
      */
     public void updateMethod(String methodName, String className) {
         MethodToClass.put(methodName, className);
-        if (!MethodtoIdx.contains(methodName)) {
-            MethodtoIdx.put(methodName, currIdx);
+        if (!(MethodToIdx.containsKey(methodName))) {
+            MethodToIdx.put(methodName, currIdx);
             currIdx = currIdx + 1;
         }
     }
@@ -54,7 +55,7 @@ public class VClass {
         for (Map.Entry<String, String> classMethod : MethodToClass.entrySet()) {
             String methodName = classMethod.getKey();
             String classDefined = classMethod.getValue();
-            System.out.println("    Method: " + methodName + " ------------ Class defined: " + classDefined);
+            System.err.println("    Method: " + methodName + " ------------ Class defined: " + classDefined);
         }
     }
 }

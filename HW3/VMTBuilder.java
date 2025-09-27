@@ -26,6 +26,9 @@ public class VMTBuilder {
     }
 
 
+    /**
+     * Construct Virtual Method Table for each class.
+     */
     public void BuildTable() {
         String className;
         String parentName;
@@ -43,6 +46,12 @@ public class VMTBuilder {
     }
 
 
+    /**
+     * Construct VClass, i.e. create a list of methods (inherited and defined) for the specified class
+     * @param className
+     * @param parentName
+     * @param vc Populate this VClass
+     */
     public void BuildVC(String className, String parentName, VClass vc) {
         if (parentName == null) {
             for (Map.Entry<String, MethodInfo> method : symTable.getClass(className).getMethods().entrySet()) {
